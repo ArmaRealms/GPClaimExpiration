@@ -7,6 +7,7 @@ import com.github.gpaddons.util.VaultBridge;
 import com.github.gpaddons.util.lang.Lang;
 import com.github.gpaddons.util.lang.MessageReplacement;
 import me.ryanhamshire.GriefPrevention.Claim;
+import me.ryanhamshire.GriefPrevention.CustomLogEntryTypes;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import me.ryanhamshire.GriefPrevention.PlayerData;
 import org.bukkit.OfflinePlayer;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -40,6 +42,8 @@ public class GPClaimExpiration extends JavaPlugin
 
         // Load configured claim durations.
         loadAreaDurations();
+
+        getLogger().warning(String.format("Claim expiration durations loaded. Shortest duration is %d", getShortestClaimExpiration()));
 
         // Unregister existing listeners.
         HandlerList.unregisterAll(this);
@@ -128,7 +132,15 @@ public class GPClaimExpiration extends JavaPlugin
     {
         if (player.isOnline()) return true;
 
-        PlayerData playerData = GriefPrevention.instance.dataStore.getPlayerData(player.getUniqueId());
+        UUID uuid = player.getUniqueId();
+
+        if (uuid.toString().startsWith("00000000-0000-0000")) {
+            GriefPrevention.AddLogEntry(String.format("[GPClaimExpiration] %s is exempt from expiration due to bedrock.",
+                    uuid), CustomLogEntryTypes.Debug, true);
+            return true;
+        }
+
+        PlayerData playerData = GriefPrevention.instance.dataStore.getPlayerData(uuid);
 
         if (exceedsConfigInt("expiration.bypass.claim_blocks", playerData::getAccruedClaimBlocks)) return true;
 
