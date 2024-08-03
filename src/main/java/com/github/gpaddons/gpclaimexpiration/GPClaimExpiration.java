@@ -132,15 +132,7 @@ public class GPClaimExpiration extends JavaPlugin
     {
         if (player.isOnline()) return true;
 
-        UUID uuid = player.getUniqueId();
-
-        if (uuid.toString().startsWith("00000000-0000-0000")) {
-            GriefPrevention.AddLogEntry(String.format("[GPClaimExpiration] %s is exempt from expiration due to bedrock.",
-                    uuid), CustomLogEntryTypes.Debug, true);
-            return true;
-        }
-
-        PlayerData playerData = GriefPrevention.instance.dataStore.getPlayerData(uuid);
+        PlayerData playerData = GriefPrevention.instance.dataStore.getPlayerData(player.getUniqueId());
 
         if (exceedsConfigInt("expiration.bypass.claim_blocks", playerData::getAccruedClaimBlocks)) return true;
 
